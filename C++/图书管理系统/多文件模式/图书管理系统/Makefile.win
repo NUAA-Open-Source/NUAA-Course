@@ -1,0 +1,46 @@
+# Project: 图书管理系统
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = admin.o book.o librarian.o log.o main.o reader.o user.o
+LINKOBJ  = admin.o book.o librarian.o log.o main.o reader.o user.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW32/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW32/mingw32/lib" -static-libstdc++ -static-libgcc
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.7.0/include" -I"I:/OI/Unseparated/testlib-0.9.12"
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.7.0/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.7.0/include/c++" -I"I:/OI/Unseparated/testlib-0.9.12"
+BIN      = 图书管理系统.exe
+CXXFLAGS = $(CXXINCS) -Wall
+CFLAGS   = $(INCS) -Wall
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+admin.o: admin.cpp
+	$(CPP) -c admin.cpp -o admin.o $(CXXFLAGS)
+
+book.o: book.cpp
+	$(CPP) -c book.cpp -o book.o $(CXXFLAGS)
+
+librarian.o: librarian.cpp
+	$(CPP) -c librarian.cpp -o librarian.o $(CXXFLAGS)
+
+log.o: log.cpp
+	$(CPP) -c log.cpp -o log.o $(CXXFLAGS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+reader.o: reader.cpp
+	$(CPP) -c reader.cpp -o reader.o $(CXXFLAGS)
+
+user.o: user.cpp
+	$(CPP) -c user.cpp -o user.o $(CXXFLAGS)
