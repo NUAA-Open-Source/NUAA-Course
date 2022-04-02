@@ -1,0 +1,530 @@
+#include"BookInfo.h"
+#include<iostream>
+using namespace std;
+#include<fstream>
+#include<string.h>
+#include<iomanip>
+//信息录入
+void BookInfo::setBInfo() 
+{
+	system("cls"); 
+	fstream infile;
+	infile.open("bookInfo.dat",ios::app|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"文件打开失败！";
+		exit(0);
+	}
+	cout<<"\n\n***录入图书信息***\n";
+	cout<<"请输入书籍名称:";
+	cin>>book.BookName;
+	cout<<"请输入书籍作者:";
+	cin>>book.BookAuthor; 
+	cout<<"请输入书籍数量:";
+	cin>>book.BookNum;
+	cin.ignore();
+	infile.write((char*)&book,sizeof(book));
+	while(1)
+	{
+		char choice; 
+		cout<<"\n***请问是否继续录入(y/n)";
+		cin>>choice;
+		cin.ignore();
+		if(choice=='n')
+		{
+			char ch;
+			cout<<"\n***请按任意键返回***";
+			cin.get(ch);
+			system("cls");
+			break;
+		} 
+		cout<<"请输入书籍名称:";
+		cin>>book.BookName;
+		cout<<"请输入书籍作者:";
+		cin>>book.BookAuthor; 
+		cout<<"请输入书籍数量:";
+		cin>>book.BookNum;
+		cin.ignore();
+		infile.write((char*)&book,sizeof(book)); 
+	}
+	infile.close();
+}
+//借书 
+void BookInfo::borrowSBook(char *Name)                              //继续借书？ 
+{
+	system("cls");
+	message New;
+	long long id;
+	fstream infile,outfile,infile1,infile2;
+	infile1.open("Sreader.dat",ios::in|ios::binary);
+	infile2.open("Sreader3.dat",ios::out|ios::binary);
+	char choice;
+	infile.open("bookInfo.dat",ios::in|ios::binary);
+	outfile.open("bookInfo1.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！";
+		exit(0);
+	}
+	if(infile1.fail())
+	{
+		cout<<"打开失败！";
+		exit(0);
+	}
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		if(strcmp(book.BookName,Name)==0)
+		{
+			cout<<"\n\n***所借书籍信息***\n";
+			cout<<"书名\t\t作者\t\t书籍数量\t\t\n";
+			cout<<book.BookName<<"\t\t"<<book.BookAuthor<<"\t\t"<<book.BookNum<<"\t\t"<<endl;
+			cout<<"\n\n***继续（y/n)***";
+			cin>>choice;
+			if(choice=='y')
+			{ 
+				if(book.BookNum==0)
+				{
+					cout<<"\n\n***图书以全部借出***\n";
+					outfile.write((char*)&book,sizeof(book)); 
+				} 
+				else
+				{
+					int flag=0; 
+					cout<<"\n***请输入你的学号***\n";
+					cin>>id;
+					while(!infile1.eof())
+					{
+						infile1.read((char*)&New,sizeof(New));
+						if(infile1.fail())
+						{
+							if(flag==0)
+							{
+								outfile.write((char*)&book,sizeof(book));
+								cout<<"\n***未查到信息，请重新设置***\n";
+							}
+							break;
+						}
+						int i;
+						i=New.counter;
+						if(New.ID==id)
+						{
+							strcpy(New.BookName1[i],Name);
+							New.counter++;
+							flag++;
+							book.BookNum--;
+							cout<<"请设置日期：\n";
+							New.date[i].setDate();
+							cout<<"请问您需要借多少天；";
+							cin>>New.ReserveDay[i];
+							cout<<"\n\n***借书成功***\n";
+							infile2.write((char*)&New,sizeof(New));
+							outfile.write((char*)&book,sizeof(book));
+						}
+						else
+						{
+							//flag++;
+							infile2.write((char*)&New,sizeof(New));
+						}
+					}
+					infile1.close();
+					infile2.close();
+					infile1.open("Sreader3.dat",ios::in|ios::binary);
+					infile2.open("Sreader.dat",ios::out|ios::binary);
+					while(!infile1.eof())
+					{
+						infile1.read((char*)&New,sizeof(New));
+						if(infile1.fail())
+							break;
+						infile2.write((char*)&New,sizeof(New));
+					}
+					infile1.close();
+					infile2.close();
+					
+				}
+			}
+			else
+			{
+				outfile.write((char*)&book,sizeof(book));
+				cout<<"\n\n***已取消***\n";
+			}
+		}	
+		else
+			outfile.write((char*)&book,sizeof(book));		
+	}
+	infile.close();
+	outfile.close();
+	infile.open("bookInfo1.dat",ios::in|ios::binary);
+	outfile.open("bookInfo.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！"<<endl;
+		exit(0); 
+	 }
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		outfile.write((char*)&book,sizeof(book));
+	}
+	infile.close();
+	outfile.close(); 
+}
+void BookInfo::borrowTBook(char *Name)                              //继续借书？ 
+{
+	system("cls");
+	message New;
+	long long id;
+	fstream infile,outfile,infile1,infile2;
+	infile1.open("Treader.dat",ios::in|ios::binary);
+	infile2.open("Treader3.dat",ios::out|ios::binary);
+	char choice;
+	infile.open("bookInfo.dat",ios::in|ios::binary);
+	outfile.open("bookInfo1.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！";
+		exit(0);
+	}
+	if(infile1.fail())
+	{
+		cout<<"打开失败！";
+		exit(0);
+	}
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		if(strcmp(book.BookName,Name)==0)
+		{
+			cout<<"\n\n***所借书籍信息***\n";
+			cout<<"书名\t\t作者\t\t书籍数量\t\t\n";
+			cout<<book.BookName<<"\t\t"<<book.BookAuthor<<"\t\t"<<book.BookNum<<"\t\t"<<endl;
+			cout<<"\n\n***继续（y/n)***";
+			cin>>choice;
+			if(choice=='y')
+			{ 
+				if(book.BookNum==0)
+				{
+					cout<<"\n\n***图书以全部借出***\n";
+					outfile.write((char*)&book,sizeof(book)); 
+				} 
+				else
+				{
+					int flag=0; 
+					cout<<"\n***请输入你的工号***\n";
+					cin>>id;
+					while(!infile1.eof())
+					{
+						infile1.read((char*)&New,sizeof(New));
+						if(infile1.fail())
+						{
+							if(flag==0)
+							{
+								cout<<"\n***未查到信息，请重新设置***\n"; 
+								outfile.write((char*)&book,sizeof(book));
+							}
+							break;
+						}
+						int i;
+						i=New.counter;
+						if(New.ID==id)
+						{
+							strcpy(New.BookName1[i],Name);
+							New.counter++;
+							flag++;
+							book.BookNum--;
+							cout<<"请设置日期：\n";
+							New.date[i].setDate();
+							cout<<"请问您需要借多少天；";
+							cin>>New.ReserveDay[i];
+							cout<<"\n\n***借书成功***\n";
+							infile2.write((char*)&New,sizeof(New));
+							outfile.write((char*)&book,sizeof(book));
+						}
+						else
+						{
+							//flag++;
+							infile2.write((char*)&New,sizeof(New));
+						}
+					}
+					infile1.close();
+					infile2.close();
+					infile1.open("Treader3.dat",ios::in|ios::binary);
+					infile2.open("Treader.dat",ios::out|ios::binary);
+					while(!infile1.eof())
+					{
+						infile1.read((char*)&New,sizeof(New));
+						if(infile1.fail())
+							break;
+						infile2.write((char*)&New,sizeof(New));
+					}
+					infile1.close();
+					infile2.close();
+				}
+			}
+			else
+			{
+				outfile.write((char*)&book,sizeof(book));
+				cout<<"\n\n***已取消***\n";
+			}
+		}	
+		else
+			outfile.write((char*)&book,sizeof(book));		
+	}
+	infile.close();
+	outfile.close();
+	infile.open("bookInfo1.dat",ios::in|ios::binary);
+	outfile.open("bookInfo.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！"<<endl;
+		exit(0); 
+	 }
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		outfile.write((char*)&book,sizeof(book));
+	}
+	infile.close();
+	outfile.close(); 
+}
+//还书 
+void BookInfo::returnSBook(char *Name)
+{
+	system("cls");
+	fstream infile,outfile,infile1,infile2;
+	message New;
+	infile1.open("Sreader.dat",ios::in|ios::binary);
+	infile2.open("Sreader3.dat",ios::out|ios::binary);
+	char choice;
+	long long id;
+	infile.open("bookInfo.dat",ios::in|ios::binary);
+	outfile.open("bookInfo1.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！";
+		exit(0);
+	}
+	if(infile1.fail())
+	{
+		cout<<"打开失败！";
+		exit(0);
+	}
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		if(strcmp(book.BookName,Name)==0)
+		{
+			cout<<"\n***请输入你的学号***\n";
+			cin>>id;
+			while(!infile1.eof())
+			{
+				infile1.read((char*)&New,sizeof(New));
+				if(infile1.fail())
+					break;
+				int i;
+				i=New.counter;
+				if(New.ID==id)
+				{
+					char a[21]={"无"}; 
+					strcpy(New.BookName1[i],a);
+					New.counter--;
+					book.BookNum++;
+					infile2.write((char*)&New,sizeof(New));
+					cout<<"\n\n***还书成功***\n";
+					outfile.write((char*)&book,sizeof(book));
+					strcpy(Name,"MEiYOu");
+					id=0;
+				}
+				else
+				{
+					infile2.write((char*)&New,sizeof(New));
+				}
+				 
+			}
+			infile1.close();
+			infile2.close();
+			infile1.open("Sreader3.dat",ios::in|ios::binary);
+			infile2.open("Sreader.dat",ios::out|ios::binary);
+			while(!infile1.eof())
+			{
+				infile1.read((char*)&New,sizeof(New));
+				if(infile1.fail())
+					break;
+				infile2.write((char*)&New,sizeof(New));
+			}
+			infile1.close();
+			infile2.close();  
+			 
+		}
+		else
+			outfile.write((char*)&book,sizeof(book));                  
+	}
+	infile.close();
+	outfile.close();
+	infile.open("bookInfo1.dat",ios::in|ios::binary);
+	outfile.open("bookInfo.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！"<<endl;
+		exit(0); 
+	 }
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		outfile.write((char*)&book,sizeof(book));
+	}
+	infile.close();
+	outfile.close();  
+}
+void BookInfo::returnTBook(char *Name)
+{
+	system("cls");
+	message New;
+	fstream infile,outfile,infile1,infile2;
+	infile1.open("Treader.dat",ios::in|ios::binary);
+	infile2.open("Treader3.dat",ios::out|ios::binary);
+	char choice;
+	long long id;
+	infile.open("bookInfo.dat",ios::in|ios::binary);
+	outfile.open("bookInfo1.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！";
+		exit(0);
+	}
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		if(strcmp(book.BookName,Name)==0)
+		{
+			cout<<"\n***请输入你的工号***\n";
+			cin>>id;
+			while(!infile1.eof())
+			{
+				infile1.read((char*)&New,sizeof(New));
+				if(infile1.fail())
+					break;
+				int i;
+				i=New.counter;
+				if(New.ID==id)
+				{
+					char a[21]={"无"};
+					strcpy(New.BookName1[i],a);
+					New.counter--;
+					infile2.write((char*)&New,sizeof(New));
+					book.BookNum++;
+					cout<<"\n\n***还书成功***\n";
+					id=0;
+					strcpy(Name,"Meiyou"); 
+					outfile.write((char*)&book,sizeof(book));
+				}
+				else
+				{
+					infile2.write((char*)&New,sizeof(New));
+				}
+			}
+			infile1.close();
+			infile2.close();
+			infile1.open("Treader3.dat",ios::in|ios::binary);
+			infile2.open("Treader.dat",ios::out|ios::binary);
+			while(!infile1.eof())
+			{
+				infile1.read((char*)&New,sizeof(New));
+				if(infile1.fail())
+					break;
+				infile2.write((char*)&New,sizeof(New));
+			}
+			infile1.close();
+			infile2.close();  
+		}
+		else
+			outfile.write((char*)&book,sizeof(book));                  
+	}
+	infile.close();
+	outfile.close();
+	infile.open("bookInfo1.dat",ios::in|ios::binary);
+	outfile.open("bookInfo.dat",ios::out|ios::binary);
+	if(infile.fail())
+	{
+		cout<<"打开失败！"<<endl;
+		exit(0); 
+	 }
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+			break;
+		outfile.write((char*)&book,sizeof(book));
+	}
+	infile.close();
+	outfile.close();  
+}
+//展示藏书 
+void BookInfo::showBInfo()
+{
+	system("cls");
+	fstream infile;
+	int flag=0;
+	infile.open("bookInfo.dat",ios::in|ios::binary);                           
+	if(infile.fail())
+	{
+		cout<<"打开失败！\n";
+		exit(0);
+	}
+	cout<<"\n\n***书库信息为***\n"; 
+	cout<<"书籍名称\t\t作者\t\t书籍数量\n";
+	while(!infile.eof())
+	{
+		infile.read((char*)&book,sizeof(book));
+		if(infile.fail())
+		{
+			if(flag==0)
+				cout<<"\n\n***抱歉，目前书库信息为空***\n";
+			break;
+		} 
+		
+		cout<<book.BookName<<"\t\t"<<book.BookAuthor<<"\t\t"<<book.BookNum<<endl;
+		cout<<"***********************\n"; 
+		flag++;   
+	}
+	infile.close();
+	char ch;
+	cout<<"\n***按任意键返回目录***";
+	cin.get(ch);
+	system("cls"); 
+}
+//清空书库 
+void BookInfo::clearBook()
+{
+	system("cls");
+	char ch;
+	cout<<"\n***请问是否继续操纵***\n";
+	cin>>ch;
+	cin.ignore();
+	if(ch=='y')
+	{
+		fstream infile;
+		infile.open("bookInfo.dat",ios::out|ios::binary);
+		if(infile.fail())
+		{
+			cout<<"打开失败！\n";
+			exit(0);
+		}
+		cout<<"\n\n***清空成功***\n";
+		infile.close();
+	}
+}  
